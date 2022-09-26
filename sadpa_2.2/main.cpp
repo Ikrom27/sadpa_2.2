@@ -75,14 +75,14 @@ int main()
 
     //std::cout << "Name for Text: "; std::cin >> fnameText;
     //std::cout << "Name for Text: "; std::cin >> fnameBin;
-    
-    //std::ifstream ft(fnameText);
-    //std::ofstream fb(fnameBin, std::ios::out | std::ios::binary);
 
     std::ifstream ft("text.txt");
-    std::cout << ft.rdbuf();
-
     std::ofstream fb("binar.dat", std::ios::out | std::ios::binary);
+
+    //std::ifstream ft("text.txt");
+    //std::cout << ft.rdbuf();
+
+    //std::ofstream fb("binar.dat", std::ios::out | std::ios::binary);
 
     if (!ft || !fb)
     {
@@ -91,9 +91,8 @@ int main()
     }
 
     std::cout << ft.rdbuf();
-
     create_bin_file(ft, fb);
-    std::ifstream fbb(fnameBin, std::ios::in | std::ios::binary);
+    std::ifstream fbb("binar.dat", std::ios::in | std::ios::binary);
     out_bin_file(fbb);
     return 0;
 }
