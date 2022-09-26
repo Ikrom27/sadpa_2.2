@@ -6,8 +6,8 @@
 
 
 struct book {
-    char* group;
-    char* discipline;
+    std::string group;
+    std::string discipline;
     int lesson_num;
     int week_num;
     int week_day;
@@ -19,7 +19,7 @@ struct book {
 void create_bin_file(std::ifstream& ft, std::ofstream& fb)
 {
     book file;
-    /*
+
     while (!ft.eof())
     {
         getline(ft, file.group);
@@ -30,15 +30,8 @@ void create_bin_file(std::ifstream& ft, std::ofstream& fb)
         getline(ft, file.lesson_type);
         getline(ft, file.audience_number);
         fb.write((char*)&file, sizeof(book));
-    } */
-    ft.get(file.group, 11);
-    ft.get(file.discipline, 11);
-    ft >> file.lesson_num;
-    ft >> file.week_num;
-    ft >> file.week_day;
-    getline(ft, file.lesson_type);
-    getline(ft, file.audience_number);
-    fb.write((char*)&file, sizeof(book));
+        fb.clear();
+    } 
     ft.close();
     fb.close();
 }
@@ -59,7 +52,8 @@ void out_bin_file(std::ifstream& fb)
     std::cout << file.audience_number << std::endl;
     
     fb.read((char*)&file, sizeof(book));
-    system("pause");
+    fb.clear();
+    fb.seekg(0);
     if (!fb.good()) {
         std::cout << "Произошла ошибка out_bin_file : !fb.good()" << std::endl;
     }
@@ -69,14 +63,14 @@ void out_bin_file(std::ifstream& fb)
 
 int main()
 {
-    setlocale(LC_ALL, "rus");
+    setlocale(LC_ALL, "ru");
 
     //char fnameText[30], fnameBin[30];
 
     //std::cout << "Name for Text: "; std::cin >> fnameText;
     //std::cout << "Name for Text: "; std::cin >> fnameBin;
 
-    std::ifstream ft("text.txt");
+    std::ifstream ft("binar.txt", std::ios::binary);
     std::ofstream fb("binar.dat", std::ios::out | std::ios::binary);
 
     //std::ifstream ft("text.txt");
@@ -91,8 +85,6 @@ int main()
     }
 
     std::cout << ft.rdbuf();
-
-    system("pause");
 
     create_bin_file(ft, fb);
     std::ifstream fbb("binar.dat", std::ios::in | std::ios::binary);
