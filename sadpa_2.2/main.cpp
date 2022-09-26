@@ -59,7 +59,7 @@ void out_bin_file(std::ifstream& fb)
     std::cout << file.audience_number << std::endl;
     
     fb.read((char*)&file, sizeof(book));
-    
+    system("pause");
     if (!fb.good()) {
         std::cout << "Произошла ошибка out_bin_file : !fb.good()" << std::endl;
     }
@@ -91,6 +91,9 @@ int main()
     }
 
     std::cout << ft.rdbuf();
+
+    system("pause");
+
     create_bin_file(ft, fb);
     std::ifstream fbb("binar.dat", std::ios::in | std::ios::binary);
     out_bin_file(fbb);
