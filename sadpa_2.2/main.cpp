@@ -2,72 +2,170 @@
 #include "iostream"
 #include "istream"
 #include <string>
+#include <optional>
 
 
 struct book {
-	std::string group;
-	std::string discipline;
+	char group[20];
+	char discipline[30];
 	int lesson_num;
 	int week_num;
 	int week_day;
-	std::string lesson_type;
-	std::string audience_number;
+	char lesson_type[20];
+	char audience_number[20];
 };
 
 
-void create_bin_file(std::ifstream& ft, std::ofstream& fb)
+void create_bin_file(std::string fnameText, std::string fnameBin)
 {
 	book file;
-	while (!ft.eof())
+
+	std::ifstream ft;
+	std::ofstream fb;
+
+	ft.open(fnameText, std::ios::out);
+	fb.open(fnameBin, std::ios::out | std::ios::binary);
+
+	if (!ft || !fb)
 	{
-		getline(ft, file.group);
-		getline(ft, file.discipline);
+		std::cout << "файл не открыт";
+		return;
+	}
+
+	while (!ft.eof()) {		
+		ft.getline(file.group, sizeof(file.group));
+		ft.getline(file.discipline, sizeof(file.discipline));
 		ft >> file.lesson_num;
 		ft >> file.week_num;
 		ft >> file.week_day;
-		getline(ft, file.lesson_type);
-		getline(ft, file.audience_number);
+		ft.get();
+		ft.getline(file.lesson_type, sizeof(file.lesson_type));
+		ft.getline(file.audience_number, sizeof(file.lesson_type));
 		fb.write((char*)&file, sizeof(book));
 		fb.clear();
 	}
+
 	ft.close();
 	fb.close();
 }
 
 
-void out_bin_file(std::ifstream& fb)
+void out_bin_file(std::string fnameBin)
+{
+
+	book file;
+
+	std::ifstream fb;
+	fb.open(fnameBin, std::ios::out | std::ios::binary);
+
+	if (!fb)
+	{
+		std::cout << "файл не открыт";
+		return;
+	}
+
+	fb.read((char*)&file, sizeof(book));
+	while (!fb.eof()) {
+		std::cout << file.group << std::endl;
+		std::cout << file.discipline << std::endl;
+		std::cout << file.lesson_num << std::endl;
+		std::cout << file.week_num << std::endl;
+		std::cout << file.week_day << std::endl;
+		std::cout << file.lesson_type << std::endl;
+		std::cout << file.audience_number << std::endl;
+		fb.read((char*)&file, sizeof(book));
+	}
+	
+	fb.clear();
+	fb.close();
+}
+
+
+void out_bin_file_by_key(std::string fnameBin)
 {
 	book file;
-	
+	std::ifstream fb;
+	int key = 1;
+	int note_num;
+
+	std::cout << "Print note number: "; std::cin >> note_num;
+
+	fb.open(fnameBin, std::ios::out | std::ios::binary);
+	if (!fb)
+	{
+		std::cout << "файл не открыт";
+		return;
+	}
 	fb.read((char*)&file, sizeof(book));
-	
-	std::cout << file.group << std::endl;
-	std::cout << file.discipline << std::endl;
-	std::cout << file.lesson_num << std::endl;
-	std::cout << file.week_num << std::endl;
-	std::cout << file.week_day << std::endl;
-	std::cout << file.lesson_type << std::endl;
-	std::cout << file.audience_number << std::endl;
 
-	//fb.read((char*)&file, sizeof(book));
+	while (!fb.eof()) {
+		if (key == note_num) {
+			std::cout << file.group << std::endl;
+			std::cout << file.discipline << std::endl;
+			std::cout << file.lesson_num << std::endl;
+			std::cout << file.week_num << std::endl;
+			std::cout << file.week_day << std::endl;
+			std::cout << file.lesson_type << std::endl;
+			std::cout << file.audience_number << std::endl;
+			return;
+		}
+		key += 1;
+		fb.read((char*)&file, sizeof(book));
+	}
+
+	std::cout << "Введено неверное значение";
+
+	fb.clear();
+	fb.close();
+	return;
 }
 
-void add_bin_file(char* fnameBin)
+
+void delete_note_by_key(std::string bin_path, int key)
 {
-	book x;
-	std::ofstream fadd(fnameBin, std::ios::in | std::ios::binary | std::ios::app);
+	std::fstream fs(bin_path, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
+	book last_record;
 
+	fs.seekg(-static_cast<int>(sizeof(book)), std::ios_base::end);
+	if (fs.tellg() != -1)
+	{
+		fs.read(reinterpret_cast<char*>(&last_record), sizeof(book));
+	}
+	else
+	{
+		throw std::runtime_error("No information in file");
+	}
+	fs.seekg(0);
 
-	fadd.write((char*)&x, sizeof(book));
-	fadd.close();
+	book card_buffer;
+	int current_position = 0;
+	while (true)
+	{
+		current_position = fs.tellg();
+		fs.read(reinterpret_cast<char*>(&card_buffer), sizeof(book));
+		if (card_buffer.key == key)
+		{
+			fs.seekg(current_position);
+			fs.write(reinterpret_cast<char*>(&last_record), sizeof(book));
+
+			fs.close();
+
+			return;
+		}
+		if (fs.eof())
+		{
+			fs.close();
+			throw std::runtime_error("Can't find record with such key");
+		}
+	}
 }
+
+
+
 int main()
 {
 	setlocale(LC_ALL, "rus");
-
-	std::ifstream ft;
-	std::ofstream fb;
 
 	//char fnameText[30], fnameBin[30];
 
@@ -76,17 +174,10 @@ int main()
 	
 	//std::cout << "Name for Text "; std::cin >> fnameText;
 	//std::cout << "Name for Text "; std::cin >> fnameBin;
-	
-	ft.open(fnameText, std::ios::out);
-	fb.open(fnameBin, std::ios::out | std::ios::binary);
-	std::ifstream fbb(fnameBin, std::ios::in | std::ios::binary);
-	if (!ft || !fb)
-	{
-		std::cout << "файл не открыт";
-		return 1;
-	}
+
 
 	int num;
+	int key;
 
 	while (1)
 	{
@@ -99,26 +190,18 @@ int main()
 
 		switch (num)
 		{
-		case 1: create_bin_file(ft, fb); break;
+		case 1: create_bin_file(fnameText, fnameBin); break;
 		case 2: 
 			{
-			std::ifstream fbb(fnameBin, std::ios::in | std::ios::binary);
-			out_bin_file(fbb); break;
-			if (!fb)
-			{
-				std::cout << "файл не открыт";
-				system("pause");
+			out_bin_file(fnameBin);
+			break;
 			}
-			fb.close();
-			}
-		case 3: add_bin_file(fnameBin); break;
-		case 4: exit(0);
-		}
-
-		if(!fbb.good())
-		{
-			std::cout << "Ошибка ввода" << std::endl;
-			return 1;
+		case 3:
+			out_bin_file_by_key(fnameBin);
+			break;
+		case 4: 
+			delete_note_by_key(fnameBin, 2);
+			break;
 		}
 	}
 	return 0;
