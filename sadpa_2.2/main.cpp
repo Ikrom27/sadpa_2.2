@@ -3,6 +3,7 @@
 #include "istream"
 #include <string>
 #include <optional>
+#include <vector>
 
 
 struct book {
@@ -164,6 +165,49 @@ void delete_note_by_key(std::string bin_path, int key)
 }
 
 
+void var_22(std::string fnameBin, int key)
+{
+	book file;
+	std::vector <book> file_list(7);
+
+	std::ifstream fb;
+	fb.open(fnameBin, std::ios::out | std::ios::binary);
+
+	if (!fb)
+	{
+		std::cout << "файл не открыт";
+		return;
+	}
+
+	fb.read((char*)&file, sizeof(book));
+	while (!fb.eof()) {
+		file_list.push_back(file);
+		fb.read((char*)&file, sizeof(book));
+	}
+	fb.clear();
+	fb.close();
+
+
+	for (int note = 0; note < 7; note++) {
+		for (int second_note = 0; second_note < 6; second_note++) {
+			if (file_list[note].audience_number == file_list[note+1].audience_number) {
+				file_list[note].audience_number = file_list[note].audience_number + '1';	//нужно номер аудитории как-то написать
+			}
+		}
+		
+	}
+
+	std::ofstream fbwrite;
+	fbwrite.open(fnameBin, std::ios::out | std::ios::binary);
+
+	for (int note = 0; note < 7; note++) {
+		fbwrite.write((char*)&file_list[note], sizeof(book));
+	}
+	fbwrite.clear();
+	fbwrite.close();
+}
+
+
 
 int main()
 {
@@ -186,9 +230,10 @@ int main()
 		std::cout << " Operation for files" << std::endl;
 		std::cout << " 1. Create for TextFile inBinFile" << std::endl;
 		std::cout << " 2. OUT for BinFile" << std::endl;
-		std::cout << " 3. Add record in BinFile" << std::endl;
-		std::cout << " 4. EXIT" << std::endl;
-		std::cout << "numPunkt= "; std::cin >> num;
+		std::cout << " 3. Find note by num" << std::endl;
+		std::cout << " 4. Del note by num" << std::endl;
+		std::cout << " 5. Var. 22" << std::endl;
+		std::cout << "numPunkt = "; std::cin >> num;
 
 		switch (num)
 		{
