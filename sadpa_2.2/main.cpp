@@ -138,13 +138,14 @@ void delete_note_by_key(std::string bin_path, int key)
 	}
 	fs.seekg(0);
 
+	int n = 1;
 	book card_buffer;
 	int current_position = 0;
 	while (true)
 	{
 		current_position = fs.tellg();
 		fs.read(reinterpret_cast<char*>(&card_buffer), sizeof(book));
-		if (card_buffer.key == key)
+		if (n == key)
 		{
 			fs.seekg(current_position);
 			fs.write(reinterpret_cast<char*>(&last_record), sizeof(book));
@@ -158,6 +159,7 @@ void delete_note_by_key(std::string bin_path, int key)
 			fs.close();
 			throw std::runtime_error("Can't find record with such key");
 		}
+		n += 1;
 	}
 }
 
